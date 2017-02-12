@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0,user-scalable=no"/>
+  <title>Chatter box</title>
+  <link rel="stylesheet" type="text/css" href="css/main.css"/>
+  <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+  <script src="js/jquery-3.1.1.min.js" ></script>
+  <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.4.3.js"></script>
+
+  <script type="text/javascript">
+  	$=jQuery.noConflict();
+  	var pubnub = new PubNub({
+    		
+            publishKey : 'pub-c-760a9445-9ff2-40c1-af80-73e659ce4ee3',
+            subscribeKey : 'sub-c-fba923bc-f024-11e6-b753-0619f8945a4f',
+    		ssl: true
+	});
+
+	pubnub.subscribe({
+    channels: ['room-1']
+	});
+
+	function sendMessage(){
+		pubnub.publish(
+    	{
+	        message: {
+	            avatar: 'user.png',
+	            text: 'Hello, hoomans!'
+	        },
+        channel: 'room-1'
+    	},
+    	function (status, response) {
+        // handle status, response
+    	});
+	}
+	pubnub.addListener({
+        status: function(statusEvent) {
+            if (statusEvent.category === "PNConnectedCategory") {
+                sendMessage();
+            }
+        },
+        message: function(message) {
+            console.log("New Message!!", message);
+            $('#chattextarea').append('<div class="row"><p>'+message.message.text+'</p></div>');
+
+        },
+        presence: function(presenceEvent) {
+            // handle presence
+        }
+    })
+    $(document).ready(function(e){
+    	$('#sendbutton').click(function(e){
+		e.preventDefault();
+		var text=$('#message').value();
+		sendMessage(text);	
+		});
+    });
+	
+
+
+  </script>
+</head>
+<body>
+<div class="container-fluid">
+	<div class="col-md-8">
+		<div id="chattextarea">
+		</div>
+	</div>
+	<div class="col-md-">
+	<div class="row">
+		<div class="col-md-8" id="messagearea">
+			<input type="text" name="message" id="message">
+		</div>
+		<div class="col-md-4" id="sendbutton">
+			<p id="sendmsg">Send</p>
+		</div>
+	</div>
+	</div>
+</div>
+</body>
+</html>
