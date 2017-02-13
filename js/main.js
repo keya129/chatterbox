@@ -45,6 +45,7 @@ $=jQuery.noConflict();
 	        message: {
 	            avatar: 'user.png',
 	            user:pubnub.username,
+                time:new Date().toUTCString(),
 	            text: msg
 	        },
         channel: 'room-1'
@@ -52,6 +53,7 @@ $=jQuery.noConflict();
     	function (status, response) {
         // handle status, response
     	});
+
 
 	}
 	pubnub.addListener({
@@ -63,8 +65,16 @@ $=jQuery.noConflict();
         },
         message: function(message) {
             console.log("New Message!!", message);
-            var timesent=new Date(message.timetoken).toLocaleString();
-            $('#chattextarea').append('<div class="row"><p>'+message.message.user+'</p><p>'+message.message.text+'</p><p>'+timesent+'</p></div>');
+            var flag=0;
+             $('#onlinearea ul li').each(function(e){
+                    if($(this).html()==message.message.user){
+                        flag=1;
+                    }
+                });
+             if(flag==0){
+                $('#onlinearea ul').append('<li>'+message.message.user+'</li>');  
+             }
+            $('#chattextarea').append('<div class="row"><p>'+message.message.user+'</p><p>'+message.message.text+'</p><p>'+message.message.time+'</p></div>');
 
         },
         presence: function(presenceEvent) {
@@ -82,7 +92,7 @@ $=jQuery.noConflict();
 		
 		console.log(pubnub.username);	
 		});
-		$('#chattextarea').click(function(e){
+		$('#leaveroom').click(function(e){
 			e.preventDefault();
 			LeaveRoom();
 			
