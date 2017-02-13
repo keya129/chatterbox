@@ -1,6 +1,14 @@
+/*
+*
+*@author Keya Bhatt
+*@since  Feb 2017
+*/
 $ = jQuery.noConflict();
+
+//Generate unique id for each user
 var newUUID = PubNub.generateUUID();
 
+//create a pubnub object, taking keys from admin dashboard
 var pubnub = new PubNub({
     uuid: newUUID,
     publishKey: 'pub-c-760a9445-9ff2-40c1-af80-73e659ce4ee3',
@@ -8,10 +16,13 @@ var pubnub = new PubNub({
     ssl: true
 });
 
+//subscribe to channel room-1
 pubnub.subscribe({
     channels: ['room-1'],
     withPresence: true
 });
+
+//Keep the username information in state
 pubnub.setState({
         state: {
             user: pubnub.username
@@ -32,7 +43,7 @@ function getState() {
         }
     );
 }
-
+// unsubscribe when user clicks on Leave room
 function LeaveRoom() {
     pubnub.unsubscribe({
         channels: ['room-1']
@@ -40,6 +51,7 @@ function LeaveRoom() {
     location.reload();
 }
 
+//Send a message in the room when send button is clicked
 function sendMessage(msg) {
     pubnub.publish({
             message: {
@@ -56,6 +68,8 @@ function sendMessage(msg) {
 
 
 }
+
+//Keep listening for any new messages in room
 pubnub.addListener({
     status: function(statusEvent) {
         if (statusEvent.category === "PNConnectedCategory") {
@@ -81,7 +95,7 @@ pubnub.addListener({
         // handle presence
     }
 })
-
+/**Custom Functions***/
 $(document).ready(function(e) {
 
     $('#sendbutton').click(function(e) {
