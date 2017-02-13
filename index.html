@@ -12,8 +12,9 @@
 
   <script type="text/javascript">
   	$=jQuery.noConflict();
+  	var newUUID = PubNub.generateUUID();
   	var pubnub = new PubNub({
-    		
+    		uuid: newUUID, 
             publishKey : 'pub-c-760a9445-9ff2-40c1-af80-73e659ce4ee3',
             subscribeKey : 'sub-c-fba923bc-f024-11e6-b753-0619f8945a4f',
     		ssl: true
@@ -23,12 +24,13 @@
     channels: ['room-1']
 	});
 
-	function sendMessage(){
+	function sendMessage(msg){
 		pubnub.publish(
     	{
 	        message: {
 	            avatar: 'user.png',
-	            text: 'Hello, hoomans!'
+	            user:pubnub.username,
+	            text: msg
 	        },
         channel: 'room-1'
     	},
@@ -39,12 +41,12 @@
 	pubnub.addListener({
         status: function(statusEvent) {
             if (statusEvent.category === "PNConnectedCategory") {
-                sendMessage();
+                //sendMessage();
             }
         },
         message: function(message) {
             console.log("New Message!!", message);
-            $('#chattextarea').append('<div class="row"><p>'+message.message.text+'</p></div>');
+            $('#chattextarea').append('<div class="row"><p>'+message.message.user+'</p><p>'+message.message.text+'</p></div>');
 
         },
         presence: function(presenceEvent) {
@@ -54,9 +56,31 @@
     $(document).ready(function(e){
     	$('#sendbutton').click(function(e){
 		e.preventDefault();
-		var text=$('#message').value();
-		sendMessage(text);	
+		var text=$('#message').val();
+		sendMessage(text);
+		console.log(pubnub.username);	
 		});
+
+    	$('#username').bind("enterKey",function(e){
+   		//do stuff here
+   			pubnub.username=$('#username').val();
+   			$('#popup').hide();
+   			 $('#chattextarea').append('<div class="row"><p id="intro">Welcome '+pubnub.username+' to Chatter Box. You can start sending and receiving messages </p></div>');
+
+		});
+		$('#username').keyup(function(e){
+    			if(e.keyCode == 13){
+        			$(this).trigger("enterKey");
+    			}
+		});
+		$('#message').keyup(function(e){
+    			if(e.keyCode == 13){
+        			$('#sendbutton').trigger("click");
+    			}
+		});
+
+
+
     });
 	
 
@@ -65,6 +89,12 @@
 </head>
 <body>
 <div class="container-fluid">
+<div id="popup">
+	<div class="userdetails">
+	<label>Please Enter your name</label>
+	<input type="text" name="username"  id="username" />
+	</div>
+</div>
 	<div class="col-md-8">
 		<div id="chattextarea">
 		</div>
